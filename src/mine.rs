@@ -94,9 +94,11 @@ impl Miner {
                 let threshold = treasury.last_reset_at.saturating_add(EPOCH_DURATION);
                 if clock.unix_timestamp.ge(&threshold) || needs_reset {
                     let reset_ix = ore::instruction::reset(signer.pubkey());
-                    self.send_and_confirm(&[reset_ix])
-                        .await
-                        .expect("Transaction failed");
+                    if let Err(err) = self.send_and_confirm(&[reset_ix]).await {
+                        stdout
+                            .write_all(format!("\nTransaction failed: {:?} \n", err).as_bytes())
+                            .ok();
+                    }
                     needs_reset = false;
                 }
 
