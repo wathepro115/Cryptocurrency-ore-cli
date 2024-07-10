@@ -44,6 +44,7 @@ impl Miner {
     ) -> ClientResult<Signature> {
         let progress_bar = spinner::new_progress_bar();
         let signer = self.signer();
+        let miner = self.miner();
         let client = self.rpc_client.clone();
 
         // Return error, if balance is zero
@@ -89,7 +90,7 @@ impl Miner {
             .get_latest_blockhash_with_commitment(self.rpc_client.commitment())
             .await
             .unwrap();
-        tx.sign(&[&signer], hash);
+        tx.sign(&[&signer, &miner], hash);
 
         // Submit tx
         let mut attempts = 0;

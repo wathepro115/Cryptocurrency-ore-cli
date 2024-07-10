@@ -5,7 +5,10 @@ use ore_api::{
     consts::{CONFIG_ADDRESS, MINT_ADDRESS, PROOF, TOKEN_DECIMALS, TREASURY_ADDRESS},
     state::{Config, Proof, Treasury},
 };
-use ore_relay_api::consts::{AUTHORIZED_RELAYER, ESCROW, RELAYER};
+use ore_relay_api::{
+    consts::{AUTHORIZED_RELAYER, ESCROW, RELAYER},
+    state::Relayer,
+};
 use ore_utils::AccountDeserialize;
 use solana_client::nonblocking::rpc_client::RpcClient;
 use solana_program::{pubkey::Pubkey, sysvar};
@@ -44,6 +47,15 @@ pub async fn get_relayer_proof(client: &RpcClient, authority: Pubkey) -> Proof {
         .await
         .expect("Failed to get relayer proof account");
     *Proof::try_from_bytes(&data).expect("Failed to parse relayer proof account")
+}
+
+pub async fn get_relayer(client: &RpcClient) -> Relayer {
+    let relayer_address = relayer_pubkey();
+    let data = client
+        .get_account_data(&relayer_address)
+        .await
+        .expect("Failed to get relayer account");
+    *Relayer::try_from_bytes(&data).expect("Failed to parse relayer account")
 }
 
 pub async fn get_clock(client: &RpcClient) -> Clock {

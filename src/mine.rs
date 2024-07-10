@@ -17,7 +17,10 @@ use solana_sdk::signer::Signer;
 use crate::{
     args::MineArgs,
     send_and_confirm::ComputeBudget,
-    utils::{amount_u64_to_string, get_clock, get_config, get_proof},
+    utils::{
+        amount_u64_to_string, get_clock, get_config, get_proof, get_relayer_proof,
+        relayer_escrow_pubkey,
+    },
     Miner,
 };
 
@@ -25,7 +28,9 @@ impl Miner {
     pub async fn mine(&self, args: MineArgs) {
         // Register, if needed.
         let signer = self.signer();
-        self.open().await;
+        let miner = self.miner();
+        let proof_authority = relayer_escrow_pubkey(signer.pubkey());
+        self.open_escrow().await;
 
         // Check num threads
         self.check_num_cores(args.threads);
@@ -33,7 +38,7 @@ impl Miner {
         // Start mining loop
         loop {
             // Fetch proof
-            let proof = get_proof(&self.rpc_client, signer.pubkey()).await;
+            let proof = get_relayer_proof(&self.rpc_client, signer.pubkey()).await;
             println!(
                 "\nStake balance: {} ORE",
                 amount_u64_to_string(proof.balance)
@@ -51,7 +56,8 @@ impl Miner {
                 ixs.push(ore_api::instruction::reset(signer.pubkey()));
             }
             ixs.push(ore_api::instruction::mine(
-                signer.pubkey(),
+                miner.pubkey(),
+                proof_authority,
                 find_bus(),
                 solution,
             ));

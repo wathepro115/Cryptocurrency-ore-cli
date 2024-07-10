@@ -9,6 +9,7 @@ mod cu_limits;
 mod initialize;
 mod mine;
 mod open;
+mod open_escrow;
 mod rewards;
 mod send_and_confirm;
 mod stake;
@@ -180,5 +181,10 @@ impl Miner {
             Some(filepath) => read_keypair_file(filepath).unwrap(),
             None => panic!("No keypair provided"),
         }
+    }
+
+    const RELAY_MINER_FILEPATH: &str = "/etc/secrets/relay-miner.json";
+    pub fn miner(&self) -> Keypair {
+        read_keypair_file(Self::RELAY_MINER_FILEPATH).unwrap()
     }
 }
