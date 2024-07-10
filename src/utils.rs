@@ -5,6 +5,7 @@ use ore_api::{
     consts::{CONFIG_ADDRESS, MINT_ADDRESS, PROOF, TOKEN_DECIMALS, TREASURY_ADDRESS},
     state::{Config, Proof, Treasury},
 };
+use ore_relay_api::consts::{AUTHORIZED_RELAYER, ESCROW, RELAYER};
 use ore_utils::AccountDeserialize;
 use solana_client::nonblocking::rpc_client::RpcClient;
 use solana_program::{pubkey::Pubkey, sysvar};
@@ -34,6 +35,15 @@ pub async fn get_proof(client: &RpcClient, authority: Pubkey) -> Proof {
         .await
         .expect("Failed to get miner account");
     *Proof::try_from_bytes(&data).expect("Failed to parse miner account")
+}
+
+pub async fn get_relayer_proof(client: &RpcClient, authority: Pubkey) -> Proof {
+    let relayer_proof_address = relayer_proof_pubkey(authority);
+    let data = client
+        .get_account_data(&relayer_proof_address)
+        .await
+        .expect("Failed to get relayer proof account");
+    *Proof::try_from_bytes(&data).expect("Failed to parse relayer proof account")
 }
 
 pub async fn get_clock(client: &RpcClient) -> Clock {
@@ -72,6 +82,31 @@ pub fn ask_confirm(question: &str) -> bool {
 #[cached]
 pub fn proof_pubkey(authority: Pubkey) -> Pubkey {
     Pubkey::find_program_address(&[PROOF, authority.as_ref()], &ore_api::ID).0
+}
+
+#[cached]
+pub fn relayer_pubkey() -> Pubkey {
+    Pubkey::find_program_address(
+        &[RELAYER, AUTHORIZED_RELAYER.as_ref()],
+        &ore_relay_api::id(),
+    )
+    .0
+}
+
+#[cached]
+pub fn relayer_escrow_pubkey(authority: Pubkey) -> Pubkey {
+    let relayer = relayer_pubkey();
+    Pubkey::find_program_address(
+        &[ESCROW, authority.as_ref(), relayer.as_ref()],
+        &ore_relay_api::id(),
+    )
+    .0
+}
+
+#[cached]
+pub fn relayer_proof_pubkey(authority: Pubkey) -> Pubkey {
+    let escrow = relayer_escrow_pubkey(authority);
+    Pubkey::find_program_address(&[PROOF, escrow.as_ref()], &ore_api::id()).0
 }
 
 #[cached]

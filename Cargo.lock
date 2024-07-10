@@ -581,7 +581,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4114279215a005bc675e386011e594e1d9b800918cea18fcadadcce864a2046b"
 dependencies = [
  "borsh-derive 0.10.3",
- "hashbrown 0.13.2",
+ "hashbrown 0.12.3",
 ]
 
 [[package]]
@@ -1773,6 +1773,9 @@ name = "hashbrown"
 version = "0.12.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8a9ee70c43aaf417c914396645a0fa852624801b24ebb7ae78fe8272889ac888"
+dependencies = [
+ "ahash 0.7.8",
+]
 
 [[package]]
 name = "hashbrown"
@@ -2498,7 +2501,7 @@ version = "0.7.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "681030a937600a36906c185595136d26abfebb4aa9c65701cefcaf8578bb982b"
 dependencies = [
- "proc-macro-crate 1.3.1",
+ "proc-macro-crate 3.1.0",
  "proc-macro2",
  "quote",
  "syn 2.0.70",
@@ -2549,7 +2552,7 @@ checksum = "ff011a302c396a5197692431fc1948019154afc178baf7d8e37367442a4601cf"
 [[package]]
 name = "ore-api"
 version = "2.0.0"
-source = "git+https://github.com/regolith-labs/ore?branch=relayer-integration#89ee9f1bea12c55acec88072cce63a143b270c24"
+source = "git+https://github.com/regolith-labs/ore?branch=relayer-integration#70fb0bcfb86eb400abcbd33e5d61b2dc8a17d8c1"
 dependencies = [
  "array-const-fn-init",
  "bytemuck",
@@ -2581,6 +2584,7 @@ dependencies = [
  "futures",
  "num_cpus",
  "ore-api",
+ "ore-relay-api",
  "ore-utils",
  "rand 0.8.5",
  "solana-cli-config",
@@ -2595,9 +2599,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "ore-relay-api"
+version = "2.0.0"
+source = "git+ssh://git@github.com/regolith-labs/ore-relayer.git?branch=relayer-integration#aefd9dfd77bb26d26f90cf868bde37ea9641ff07"
+dependencies = [
+ "bytemuck",
+ "mpl-token-metadata",
+ "num_enum 0.7.2",
+ "ore-api",
+ "ore-utils",
+ "shank",
+ "solana-program",
+ "spl-associated-token-account",
+ "spl-token",
+ "static_assertions",
+ "thiserror",
+]
+
+[[package]]
 name = "ore-utils"
 version = "2.0.0"
-source = "git+https://github.com/regolith-labs/ore?branch=relayer-integration#89ee9f1bea12c55acec88072cce63a143b270c24"
+source = "git+https://github.com/regolith-labs/ore?branch=relayer-integration#70fb0bcfb86eb400abcbd33e5d61b2dc8a17d8c1"
 dependencies = [
  "bytemuck",
  "solana-program",

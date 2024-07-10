@@ -29,6 +29,7 @@ futures = "0.3.30"
 num_cpus = "1.16.0"
 ore-api = { git = "https://github.com/regolith-labs/ore", branch = "relayer-integration" }
 ore-utils = { git = "https://github.com/regolith-labs/ore", branch = "relayer-integration" }
+ore-relay-api = { git = "ssh://git@github.com/regolith-labs/ore-relayer.git", branch = "relayer-integration" }
 rand = "0.8.4"
 solana-cli-config = "^1.18"
 solana-client = "^1.18"

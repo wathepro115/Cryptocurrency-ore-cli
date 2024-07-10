@@ -55,7 +55,7 @@ impl Miner {
                 find_bus(),
                 solution,
             ));
-            self.send_and_confirm(&ixs, ComputeBudget::Fixed(500_000), false)
+            self.send_and_confirm(&ixs, ComputeBudget::Fixed(1_000_000), false)
                 .await
                 .ok();
         }
