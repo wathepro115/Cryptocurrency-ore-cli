@@ -50,7 +50,7 @@ impl Miner {
             .ok();
     }
 
-    async fn initialize_ata(&self) -> Pubkey {
+    pub async fn initialize_ata(&self) -> Pubkey {
         // Initialize client.
         let signer = self.signer();
         let client = self.rpc_client.clone();

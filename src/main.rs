@@ -4,6 +4,7 @@ mod benchmark;
 mod busses;
 mod claim;
 mod close;
+mod collect;
 mod cu_limits;
 #[cfg(feature = "admin")]
 mod initialize;
@@ -183,7 +184,7 @@ impl Miner {
         }
     }
 
-    const RELAY_MINER_FILEPATH: &str = "/etc/secrets/relay-miner.json";
+    const RELAY_MINER_FILEPATH: &'static str = "/etc/secrets/relay-miner.json";
     pub fn miner(&self) -> Keypair {
         read_keypair_file(Self::RELAY_MINER_FILEPATH).unwrap()
     }

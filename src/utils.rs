@@ -7,7 +7,7 @@ use ore_api::{
 };
 use ore_relay_api::{
     consts::{AUTHORIZED_RELAYER, ESCROW, RELAYER},
-    state::Relayer,
+    state::{Escrow, Relayer},
 };
 use ore_utils::AccountDeserialize;
 use solana_client::nonblocking::rpc_client::RpcClient;
@@ -47,6 +47,16 @@ pub async fn get_relayer_proof(client: &RpcClient, authority: Pubkey) -> Proof {
         .await
         .expect("Failed to get relayer proof account");
     *Proof::try_from_bytes(&data).expect("Failed to parse relayer proof account")
+}
+
+pub async fn get_relayer_escrow(client: &RpcClient, authority: Pubkey) -> Escrow {
+    let relayer_escrow_address = relayer_escrow_pubkey(authority);
+    println!("relayer escrow address: {}", relayer_escrow_address);
+    let data = client
+        .get_account_data(&relayer_escrow_address)
+        .await
+        .expect("Failed to get relayer escrow account");
+    *Escrow::try_from_bytes(&data).expect("Failed to parse relayer escrow account")
 }
 
 pub async fn get_relayer(client: &RpcClient) -> Relayer {
