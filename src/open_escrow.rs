@@ -21,7 +21,7 @@ impl Miner {
         println!("Generating challenge...");
         let relayer = get_relayer(&rpc_client).await;
         println!("relayer: {:?}", relayer);
-        let ix = ore_relay_api::instruction::open_escrow(signer.pubkey(), relayer);
+        let ix = ore_relay_api::instruction::open_escrow(signer.pubkey(), relayer, signer.pubkey());
         let res = self
             .send_and_confirm(&[ix], ComputeBudget::Dynamic, false)
             .await;
