@@ -2,7 +2,7 @@ use solana_sdk::signer::Signer;
 
 use crate::{
     send_and_confirm::ComputeBudget,
-    utils::{get_relayer, relayer_proof_pubkey},
+    utils::{get_relayer, get_relayer_proof, relayer_proof_pubkey},
     Miner,
 };
 
@@ -13,6 +13,7 @@ impl Miner {
         let signer = self.signer();
         let proof_address = relayer_proof_pubkey(signer.pubkey());
         if rpc_client.get_account(&proof_address).await.is_ok() {
+            println!("proof ok");
             return;
         }
 
@@ -21,8 +22,16 @@ impl Miner {
         let relayer = get_relayer(&rpc_client).await;
         println!("relayer: {:?}", relayer);
         let ix = ore_relay_api::instruction::open_escrow(signer.pubkey(), relayer);
-        self.send_and_confirm(&[ix], ComputeBudget::Dynamic, false)
-            .await
-            .ok();
+        let res = self
+            .send_and_confirm(&[ix], ComputeBudget::Dynamic, false)
+            .await;
+        match res {
+            Ok(_) => {
+                println!("open escrow ix");
+            }
+            Err(err) => {
+                println!("err on open escrow ix: {}", err);
+            }
+        }
     }
 }

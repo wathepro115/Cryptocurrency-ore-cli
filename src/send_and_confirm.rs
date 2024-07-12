@@ -90,6 +90,17 @@ impl Miner {
             .get_latest_blockhash_with_commitment(self.rpc_client.commitment())
             .await
             .unwrap();
+
+        // tx.get_signing_keypair_positions(pubkeys)
+        let num_required_signatures = tx.message.header.num_required_signatures;
+        println!("num required sigs: {}", num_required_signatures);
+        let positions = tx.get_signing_keypair_positions(&[miner.pubkey(), signer.pubkey()])?;
+        println!("positions: {:?}", positions);
+        let signer_0 = tx.message.account_keys[0];
+        println!("signer 0: {}", signer_0);
+        let signer_1 = tx.message.account_keys[1];
+        println!("signer 1: {}", signer_1);
+
         tx.sign(&[&signer, &miner], hash);
 
         // Submit tx
