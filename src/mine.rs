@@ -29,7 +29,7 @@ impl Miner {
         // Register, if needed.
         let signer = self.signer();
         let miner = self.miner();
-        let proof_authority = relayer_escrow_pubkey(signer.pubkey());
+        let escrow = relayer_escrow_pubkey(signer.pubkey());
         self.open_escrow().await;
 
         // Check num threads
@@ -53,16 +53,16 @@ impl Miner {
             // Submit most difficult hash
             let mut ixs = vec![];
             if self.needs_reset().await {
-                ixs.push(ore_api::instruction::reset(signer.pubkey()));
+                ixs.push(ore_api::instruction::reset(miner.pubkey()));
             }
             ixs.push(ore_api::instruction::mine(
                 miner.pubkey(),
-                proof_authority,
+                escrow,
                 find_bus(),
                 solution,
             ));
-            // let relayer_collect_ix = self.build_collect_ix().await;
-            // ixs.push(relayer_collect_ix);
+            let relayer_collect_ix = self.build_collect_ix().await;
+            ixs.push(relayer_collect_ix);
             self.send_and_confirm(&ixs, ComputeBudget::Fixed(1_500_000), false)
                 .await
                 .ok();

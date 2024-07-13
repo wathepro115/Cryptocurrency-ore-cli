@@ -101,7 +101,7 @@ impl Miner {
         let signer_1 = tx.message.account_keys[1];
         println!("signer 1: {}", signer_1);
 
-        tx.sign(&[&signer, &miner], hash);
+        tx.sign(&[&miner, &signer], hash);
 
         // Submit tx
         let mut attempts = 0;
