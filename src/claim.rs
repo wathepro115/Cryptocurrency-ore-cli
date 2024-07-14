@@ -9,7 +9,7 @@ use crate::{
     args::ClaimArgs,
     cu_limits::CU_LIMIT_CLAIM,
     send_and_confirm::ComputeBudget,
-    utils::{amount_f64_to_u64, ask_confirm, get_proof},
+    utils::{amount_f64_to_u64, ask_confirm, get_relayer_proof},
     Miner,
 };
 
@@ -17,7 +17,7 @@ impl Miner {
     pub async fn claim(&self, args: ClaimArgs) {
         let signer = self.signer();
         let pubkey = signer.pubkey();
-        let proof = get_proof(&self.rpc_client, pubkey).await;
+        let proof = get_relayer_proof(&self.rpc_client, pubkey).await;
         let beneficiary = match args.beneficiary {
             Some(beneficiary) => {
                 Pubkey::from_str(&beneficiary).expect("Failed to parse beneficiary address")
@@ -44,7 +44,7 @@ impl Miner {
             return;
         }
 
-        let ix = ore_api::instruction::claim(pubkey, beneficiary, amount);
+        let ix = ore_relay_api::instruction::claim(pubkey, beneficiary, pubkey, amount);
         self.send_and_confirm(&[ix], ComputeBudget::Fixed(CU_LIMIT_CLAIM), false)
             .await
             .ok();
