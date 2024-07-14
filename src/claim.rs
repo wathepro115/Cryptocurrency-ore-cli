@@ -45,9 +45,13 @@ impl Miner {
         }
 
         let ix = ore_relay_api::instruction::claim(pubkey, beneficiary, pubkey, amount);
-        self.send_and_confirm(&[ix], ComputeBudget::Fixed(CU_LIMIT_CLAIM), false)
+        match self
+            .send_and_confirm(&[ix], ComputeBudget::Fixed(CU_LIMIT_CLAIM), false)
             .await
-            .ok();
+        {
+            Ok(sig) => println!("ok claim: {}", sig),
+            Err(err) => println!("err claim: {}", err),
+        };
     }
 
     pub async fn initialize_ata(&self) -> Pubkey {
