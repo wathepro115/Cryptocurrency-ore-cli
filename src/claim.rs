@@ -46,7 +46,7 @@ impl Miner {
 
         let ix = ore_relay_api::instruction::claim(pubkey, beneficiary, pubkey, amount);
         match self
-            .send_and_confirm(&[ix], ComputeBudget::Fixed(CU_LIMIT_CLAIM), false)
+            .send_and_confirm(&[ix], ComputeBudget::Dynamic, false)
             .await
         {
             Ok(sig) => println!("ok claim: {}", sig),
