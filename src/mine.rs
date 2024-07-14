@@ -61,8 +61,8 @@ impl Miner {
                 find_bus(),
                 solution,
             ));
-            let relayer_collect_ix = self.build_collect_ix().await;
-            ixs.push(relayer_collect_ix);
+            // let relayer_collect_ix = self.build_collect_ix().await;
+            // ixs.push(relayer_collect_ix);
             self.send_and_confirm(&ixs, ComputeBudget::Fixed(1_500_000), false)
                 .await
                 .ok();
