@@ -38,3 +38,4 @@ spl-associated-token-account = { version = "^2.3", features = [
   "no-entrypoint",
 ] }
 tokio = "1.35.1"
+jobserver = "=0.1.27"
