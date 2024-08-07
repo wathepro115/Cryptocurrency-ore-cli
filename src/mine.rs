@@ -1,5 +1,3 @@
-use std::{sync::Arc, time::Instant};
-
 use colored::*;
 use drillx::{
     equix::{self},
@@ -10,9 +8,11 @@ use ore_api::{
     state::{Config, Proof},
 };
 use rand::Rng;
+use rayon::prelude::*;
 use solana_program::pubkey::Pubkey;
 use solana_rpc_client::spinner;
 use solana_sdk::signer::Signer;
+use std::{sync::Arc, time::Instant};
 
 use crate::{
     args::MineArgs,
@@ -81,13 +81,18 @@ impl Miner {
         // Dispatch job to each thread
         let progress_bar = Arc::new(spinner::new_progress_bar());
         progress_bar.set_message("Mining...");
+        let rt = tokio::runtime::Handle::current();
+        // inside the rayon threadpool the tokio runtime is not available.
+        // we access the runtime where it is available (outside of the pool) and spawn tasks directly on that runtime.
         let handles: Vec<_> = (0..threads)
+            .into_par_iter()
             .map(|i| {
-                std::thread::spawn({
-                    let proof = proof.clone();
-                    let progress_bar = progress_bar.clone();
-                    let mut memory = equix::SolverMemory::new();
+                rt.spawn_blocking({
+                    let value = progress_bar.clone();
                     move || {
+                        let progress_bar = value.clone();
+                        let mut memory = equix::SolverMemory::new();
+
                         let timer = Instant::now();
                         let mut nonce = u64::MAX.saturating_div(threads).saturating_mul(i);
                         let mut best_nonce = nonce;
@@ -133,21 +138,22 @@ impl Miner {
                 })
             })
             .collect();
+        let joined = futures::future::join_all(handles).await;
 
-        // Join handles and return best nonce
-        let mut best_nonce = 0;
-        let mut best_difficulty = 0;
-        let mut best_hash = Hash::default();
-        for h in handles {
-            if let Ok((nonce, difficulty, hash)) = h.join() {
-                if difficulty > best_difficulty {
-                    best_difficulty = difficulty;
-                    best_nonce = nonce;
-                    best_hash = hash;
+        let (best_nonce, best_difficulty, best_hash) = joined.into_iter().fold(
+            (0, 0, Hash::default()),
+            |(best_nonce, best_difficulty, best_hash), h| {
+                if let Ok((nonce, difficulty, hash)) = h {
+                    if difficulty > best_difficulty {
+                        (nonce, difficulty, hash)
+                    } else {
+                        (best_nonce, best_difficulty, best_hash)
+                    }
+                } else {
+                    (best_nonce, best_difficulty, best_hash)
                 }
-            }
-        }
-
+            },
+        );
         // Update log
         progress_bar.finish_with_message(format!(
             "Best hash: {} (difficulty: {})",
@@ -160,7 +166,7 @@ impl Miner {
 
     pub fn check_num_cores(&self, threads: u64) {
         // Check num threads
-        let num_cores = num_cpus::get() as u64;
+        let num_cores = std::thread::available_parallelism().unwrap().get() as u64;
         if threads.gt(&num_cores) {
             println!(
                 "{} Number of threads ({}) exceeds available cores ({})",
